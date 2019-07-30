@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/sha256"
 	"math/rand"
 	"os"
 	"time"
@@ -12,7 +11,7 @@ import (
 // UploadFile takes in an array of bytes and lifetime in seconds and stores it
 // to the fs, returning its unique name and any errors
 func UploadFile(file []byte, lifetime time.Duration, extension string, bucket *bbolt.Bucket) (string, error) {
-	hash := sha256.Sum256(file)
+	// hash := sha256.Sum256(file)
 	name := generateFileName(10) + extension
 	f, err := os.Create("files/" + name)
 
