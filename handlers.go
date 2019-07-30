@@ -23,7 +23,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 UPLOAD:
 	~/ $: curl -F 'file=@your-file' --user username:password up.simo.sh
 	 up.simo.sh/fpFx9.png
+
+NOTE:
+	Registrations are NOT open.
+
+CONTACT:
+	simo@deliriumproducts.me
 `)
+
 		return
 	}
 
@@ -48,8 +55,6 @@ UPLOAD:
 		fmt.Fprintf(w, err.Error())
 		return
 	}
-
-	fmt.Printf(header.Filename, header.Size)
 
 	bytes, err := ioutil.ReadAll(file)
 
