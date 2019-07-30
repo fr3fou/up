@@ -78,14 +78,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
-		fmt.Fprintf(w, "https://up.simo.sh/"+name)
+		fmt.Fprintf(w, r.Host+"/"+name)
 
 		return nil
 	})
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, `up.simo.sh!
+	fmt.Fprintf(w, `%+v!
 
 UPLOAD:
 	~/ $: curl -F 'file=@your-file' --user username:password up.simo.sh
@@ -96,5 +96,5 @@ NOTE:
 
 CONTACT:
 	simo@deliriumproducts.me
-`)
+`, r.Host)
 }
