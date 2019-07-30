@@ -1,9 +1,10 @@
 {{ define "content" }}
 <div class="login">
   <link rel="stylesheet" href="/static/css/pages/login.css">
-  <form action="/" method="POST" class="login-form">
-    <input name="username" value="">
-    <input name="passsword" type="password" value="">
+  <form action="/login" method="POST" class="login-form">
+    <input required="required" name="username" type="text" placeholder="usrnm">
+    <input required="required" name="passsword" type="password" placeholder="pswd">
+    <input type="submit" value="go">
   </form>
 </div>
 {{ end }}

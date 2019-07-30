@@ -26,6 +26,7 @@ body {
   width: 100%;
   text-align: center;
   padding: 1rem;
+  position: absolute;
   font-size: 3rem;
   color: white;
   font-weight: bold;
