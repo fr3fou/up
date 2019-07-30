@@ -29,7 +29,7 @@
 .login-form > input[type=submit]:focus, 
 .login-form > input[type=password]:focus {
   outline: 0;
-  border: solid #ff98ac 0.1rem;
+  border: solid #89c3d7 0.1rem;
 }
 
 .login-form > input[type=submit] {
