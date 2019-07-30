@@ -4,14 +4,13 @@ import (
 	"crypto/sha256"
 	"math/rand"
 	"os"
-	"time"
 
 	"go.etcd.io/bbolt"
 )
 
 // UploadFile takes in an array of bytes and lifetime in seconds and stores it
 // to the fs, returning its unique name and any errors
-func UploadFile(file []byte, lifetime time.Duration, extension string, bucket *bbolt.Bucket) (string, error) {
+func UploadFile(file []byte, fileSize int64, extension string, bucket *bbolt.Bucket) (string, error) {
 	hash := sha256.Sum256(file)
 	val := bucket.Get(hash[:])
 
@@ -23,6 +22,7 @@ func UploadFile(file []byte, lifetime time.Duration, extension string, bucket *b
 	}
 
 	name := generateFileName(10) + extension
+
 	f, err := os.Create("files/" + name)
 
 	if err != nil {
@@ -40,6 +40,7 @@ func UploadFile(file []byte, lifetime time.Duration, extension string, bucket *b
 // https://medium.com/@kpbird/golang-generate-fixed-size-random-string-dd6dbd5e63c0
 var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
+// generateFileName takes in a length and generates a random name
 func generateFileName(n int) string {
 	b := make([]rune, n)
 

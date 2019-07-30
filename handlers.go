@@ -5,14 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
-	"time"
 
 	"go.etcd.io/bbolt"
-)
-
-const (
-	// MB is the size of 1 Megabyte
-	MB = 1 << 20
 )
 
 var static = http.StripPrefix("/", http.FileServer(http.Dir("files/")))
@@ -35,11 +29,14 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
 
-	if err := r.ParseMultipartForm(MB * 512); err != nil {
-		fmt.Fprintf(w, "Max file size is 512MB")
-	}
+	r.ParseMultipartForm(MaxSize)
 
 	file, header, err := r.FormFile("file")
+
+	if header.Size > MaxSize {
+		fmt.Fprintf(w, "Max file size is 512 MiB")
+		return
+	}
 
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
@@ -71,7 +68,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
-		name, err := UploadFile(bytes, time.Hour*24*30, filepath.Ext(header.Filename), bucket)
+		name, err := UploadFile(bytes, header.Size, filepath.Ext(header.Filename), bucket)
 
 		if err != nil {
 			fmt.Fprintf(w, err.Error())
@@ -95,6 +92,6 @@ NOTE:
 	Registrations are NOT open.
 
 CONTACT:
-	simo@deliriumproducts.me
+	simo at deliriumproducts.me
 `, r.Host, r.Host, r.Host)
 }
