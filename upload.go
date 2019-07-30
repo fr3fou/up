@@ -2,8 +2,11 @@ package main
 
 import (
 	"crypto/sha256"
+	"fmt"
+	"math"
 	"math/rand"
 	"os"
+	"time"
 
 	"go.etcd.io/bbolt"
 )
@@ -15,10 +18,22 @@ func UploadFile(file []byte, fileSize int64, extension string, bucket *bbolt.Buc
 	val := bucket.Get(hash[:])
 
 	// If there was an entry already, return it (file already exists)
-	// TODO: check for TTL using os.Stat(),
-	// if it's ~80% through its lifetime, reupload
 	if val != nil {
-		return string(val), nil
+		file, err := os.Stat("files/" + string(val))
+
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		// TODO: Race condition? what if the file is being deleted as we are sending it back?
+		// Maybe use a channel to block here?
+		timePassed := float64(daysBetween(file.ModTime(), time.Now()))
+		maxAge := math.Floor(calculateAge(MinAge, MaxAge, file.Size(), MaxSize))
+
+		// If it's ~95% through its lifetime, reupload
+		if !(timePassed/maxAge <= 0.95) {
+			return string(val), nil
+		}
 	}
 
 	name := generateFileName(10) + extension
