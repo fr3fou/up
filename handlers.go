@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +17,6 @@ UPLOAD:
 `)
 		return
 	} else if r.Method == "POST" {
-		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		if err := r.ParseMultipartForm(MB * 512); err != nil {
 			fmt.Fprintf(w, "Max file size is 512MB")
 		}
@@ -37,14 +37,13 @@ UPLOAD:
 			return
 		}
 
-		name, err := UploadFile(bytes)
+		name, err := UploadFile(bytes, time.Hour*24*30)
 
 		if err != nil {
 			fmt.Fprintf(w, err.Error())
 			return
 		}
 
-		fmt.Fprintf(w, "")
-
+		fmt.Fprintf(w, name)
 	}
 }
