@@ -8,8 +8,8 @@ import (
 
 // UploadFile takes in an array of bytes and lifetime in seconds and stores it
 // to the fs, returning its unique name and any errors
-func UploadFile(file []byte, lifetime time.Duration) (string, error) {
-	f, err := os.Create(generateFileName(10))
+func UploadFile(file []byte, lifetime time.Duration, extension string) (string, error) {
+	f, err := os.Create(generateFileName(10) + extension)
 
 	if err != nil {
 		return "", err

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"time"
 )
 
@@ -37,7 +38,7 @@ UPLOAD:
 			return
 		}
 
-		name, err := UploadFile(bytes, time.Hour*24*30)
+		name, err := UploadFile(bytes, time.Hour*24*30, filepath.Ext(header.Filename))
 
 		if err != nil {
 			fmt.Fprintf(w, err.Error())
