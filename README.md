@@ -9,3 +9,4 @@
 - [x] Reupload if the file is going to be deleted soon
 - [ ] Dockerfile for "easy" daemonizing (super overkill, especially considering the portability of go, but it's the only thing I know /shrug - better option is simply to use systemd) 
 - [ ] Refactor with structs?
+- [ ] Tests lol
