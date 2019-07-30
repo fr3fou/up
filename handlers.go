@@ -85,16 +85,16 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, `%+v!
+	fmt.Fprintf(w, `%s!
 
 UPLOAD:
-	~/ $: curl -F 'file=@your-file' --user username:password up.simo.sh
-	 up.simo.sh/fpFx9.png
+	~/ $: curl -F 'file=@your-file' --user username:password %s
+	 %s/fpFx9.png
 
 NOTE:
 	Registrations are NOT open.
 
 CONTACT:
 	simo@deliriumproducts.me
-`, r.Host)
+`, r.Host, r.Host, r.Host)
 }
