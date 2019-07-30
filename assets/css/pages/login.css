@@ -2,7 +2,7 @@
   display: flex; 
   background-color: rgba(0,0,0,0.12);
   padding: 1rem;
-  border-radius: 2rem;
+  border-radius: 1.4rem;
   transition: all 0.2s ease;
 }
 
