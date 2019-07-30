@@ -71,17 +71,17 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
+		name, err := UploadFile(bytes, time.Hour*24*30, filepath.Ext(header.Filename), bucket)
+
+		if err != nil {
+			fmt.Fprintf(w, err.Error())
+			return err
+		}
+
+		fmt.Fprintf(w, "https://up.simo.sh/"+name)
+
 		return nil
 	})
-
-	name, err := UploadFile(bytes, time.Hour*24*30, filepath.Ext(header.Filename), bucket)
-
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	fmt.Fprintf(w, "https://up.simo.sh/"+name)
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {

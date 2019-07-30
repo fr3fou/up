@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/sha256"
 	"math/rand"
 	"os"
 	"time"
@@ -11,7 +12,16 @@ import (
 // UploadFile takes in an array of bytes and lifetime in seconds and stores it
 // to the fs, returning its unique name and any errors
 func UploadFile(file []byte, lifetime time.Duration, extension string, bucket *bbolt.Bucket) (string, error) {
-	// hash := sha256.Sum256(file)
+	hash := sha256.Sum256(file)
+	val := bucket.Get(hash[:])
+
+	// If there was an entry already, return it (file already exists)
+	// TODO: check for TTL using os.Stat(),
+	// if it's ~80% through its lifetime, reupload
+	if val != nil {
+		return string(val), nil
+	}
+
 	name := generateFileName(10) + extension
 	f, err := os.Create("files/" + name)
 
@@ -21,6 +31,8 @@ func UploadFile(file []byte, lifetime time.Duration, extension string, bucket *b
 
 	f.Write(file)
 	f.Close()
+
+	bucket.Put(hash[:], []byte(name))
 
 	return name, nil
 }
