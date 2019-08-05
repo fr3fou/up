@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os"
 	"path/filepath"
+	"strings"
 
 	"go.etcd.io/bbolt"
 )
@@ -27,6 +31,11 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	// Disallow any other methods
 	if r.Method != "POST" {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	}
+
+	// Handle auth
+	if !auth(w, r) {
+		return
 	}
 
 	r.ParseMultipartForm(MaxSize)
@@ -79,6 +88,32 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 		return nil
 	})
+}
+
+// https://gist.github.com/nicerobot/4375261#file-server-go
+func auth(w http.ResponseWriter, r *http.Request) bool {
+	userPass := os.Getenv("AUTH")
+	auth := r.Header.Get("Authorization")
+
+	if !strings.HasPrefix(auth, "Basic ") {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return false
+	}
+
+	up, err := base64.StdEncoding.DecodeString(auth[6:])
+
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return false
+	}
+
+	if string(up) != userPass {
+		log.Print("Someone tried accessing with credentials: ", string(up))
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return false
+	}
+
+	return true
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
