@@ -34,6 +34,9 @@ func UploadFile(file []byte, fileSize int64, extension string, bucket *bbolt.Buc
 		if !(timePassed/maxAge <= 0.95) {
 			return string(val), nil
 		}
+
+		// Delete as it's going to get put again afterwards
+		bucket.Delete(hash[:])
 	}
 
 	name := generateFileName(10) + extension
