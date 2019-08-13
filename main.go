@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"go.etcd.io/bbolt"
 )
 
 const (
@@ -24,10 +26,22 @@ const (
 	MiB = 1 << 20
 )
 
+var db *bbolt.DB
+
 func main() {
 	http.HandleFunc("/", rootHandler)
 
 	fmt.Println("up! ⚡ is running on port :8080!")
+
+	var err error
+
+	db, err = bbolt.Open("files.db", 0600, nil)
+
+	if err != nil {
+		panic(err)
+	}
+
+	defer db.Close()
 
 	go func() {
 		// Clear files every day

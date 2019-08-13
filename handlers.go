@@ -59,19 +59,8 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db, err := bbolt.Open("files.db", 0600, nil)
-
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-		return
-	}
-
-	defer db.Close()
-
-	var bucket *bbolt.Bucket
-
 	db.Update(func(tx *bbolt.Tx) (err error) {
-		bucket, err = tx.CreateBucketIfNotExists([]byte("files"))
+		bucket, err := tx.CreateBucketIfNotExists([]byte("files"))
 
 		if err != nil {
 			return err
