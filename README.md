@@ -58,4 +58,4 @@ curl -F 'file=@something.png' -u "user:pass" up.simo.sh
 - [ ] Dockerfile for "easy" daemonizing (super overkill, especially considering the portability of go, but it's the only thing I know /shrug - better option is simply to use systemd)
 - [ ] Refactor with structs?
 - [ ] Tests lol
-- [ ] url shortener
+- [ ] URL shortener
