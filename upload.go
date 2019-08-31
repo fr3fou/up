@@ -41,7 +41,6 @@ func UploadFile(file []byte, fileSize int64, extension string, bucket *bbolt.Buc
 
 	var name string
 	for {
-
 		name = generateFileName(10) + extension
 		_, err := os.Stat("files/" + name)
 
