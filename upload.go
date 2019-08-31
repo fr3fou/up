@@ -39,7 +39,20 @@ func UploadFile(file []byte, fileSize int64, extension string, bucket *bbolt.Buc
 		bucket.Delete(hash[:])
 	}
 
-	name := generateFileName(10) + extension
+	var name string
+	for {
+
+		name = generateFileName(10) + extension
+		_, err := os.Stat("files/" + name)
+
+		if err != nil {
+			if os.IsNotExist(err) {
+				break
+			}
+
+			return "", err
+		}
+	}
 
 	f, err := os.Create("files/" + name)
 
