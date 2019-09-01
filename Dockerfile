@@ -5,4 +5,4 @@ RUN go mod download
 COPY . .
 RUN go build -o up ./
 EXPOSE 8080
-CMD ['./main']
+CMD ['./up']
