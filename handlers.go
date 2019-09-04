@@ -73,7 +73,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 			return err
 		}
 
-		fmt.Fprintf(w, r.Host+"/"+name)
+		fmt.Fprintf(w, "https://"+r.Host+"/"+name)
 
 		return nil
 	})
