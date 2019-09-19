@@ -55,7 +55,7 @@ curl -F 'file=@something.png' -u "user:pass" up.simo.sh
 - [x] Automatic deletion after N amount of days (size dependent)
 - [x] SHA256 hash to check for duplicates
 - [x] Reupload if the file is going to be deleted soon
-- [ ] Dockerfile for "easy" daemonizing (super overkill, especially considering the portability of go, but it's the only thing I know /shrug - better option is simply to use systemd)
+- [x] Dockerfile for "easy" daemonizing (super overkill, especially considering the portability of go, but it's the only thing I know /shrug - better option is simply to use systemd)
 - [ ] Refactor with structs?
 - [ ] Tests lol
 - [ ] URL shortener
