@@ -13,7 +13,7 @@ AUTH="user:pass" ./up
 AUTH="user:pass" go run .
 ```
 
-- Use ShareX, curl or any other client
+- Use ShareX, cURL or any other client
 
 ```sh
 curl -F 'file=@something.png' -u "user:pass" up.simo.sh
