@@ -29,8 +29,8 @@ var (
 )
 
 func main() {
-	Auth = getEnv("AUTH", "")
-	Address = getEnv("ADDRESS", ":8080")
+	Auth = env("AUTH", "")
+	Address = env("ADDRESS", ":8080")
 
 	http.HandleFunc("/", rootHandler)
 
@@ -44,7 +44,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func getEnv(key, fallback string) string {
+func env(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
