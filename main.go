@@ -1,10 +1,13 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 const (
@@ -75,11 +78,39 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
 
+	// Upload the file
 	uploadHandler(w, r)
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	// Handle auth
+	if !isAuth(w, r) {
+		return
+	}
 
+	// Check for file size
+	r.ParseMultipartForm(MaxSize)
+	file, header, err := r.FormFile("file")
+	if err != nil || header.Size > MaxSize {
+		fmt.Fprintf(w, "Max file size is 512 MiB")
+		return
+	}
+
+	_, err = ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+		return
+	}
+
+	name := "test"
+
+	// name, err := UploadFile(bytes, header.Size, filepath.Ext(header.Filename))
+
+	// if err != nil {
+	// 	fmt.Fprintf(w, err.Error())
+	// }
+
+	fmt.Fprintf(w, "https://%s/%s", r.Host, name)
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +124,26 @@ AUTH:
 SOURCE:
 	https://github.com/fr3fou/up	
 `, r.Host, r.Host, r.Host, r.Host)
+}
+
+// https://gist.github.com/nicerobot/4375261#file-server-go
+func isAuth(w http.ResponseWriter, r *http.Request) bool {
+	cred := r.Header.Get("Authorization")
+
+	if !strings.HasPrefix(cred, "Basic ") {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return false
+	}
+
+	up, err := base64.StdEncoding.DecodeString(cred[6:])
+
+	if err != nil || string(up) != auth {
+		log.Printf("Someone tried accessing with credentials :%s", string(up))
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+		return false
+	}
+
+	return true
 }
 
 func env(key, fallback string) string {
