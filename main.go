@@ -1,13 +1,20 @@
 package main
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
+	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
+	"time"
+
+	"github.com/syndtr/goleveldb/leveldb"
 )
 
 const (
@@ -38,6 +45,10 @@ var (
 	static http.Handler
 )
 
+var (
+	DB *leveldb.DB
+)
+
 func main() {
 	auth = env("AUTH", "")
 	address = env("ADDRESS", ":8080")
@@ -48,6 +59,15 @@ func main() {
 			http.Dir(dir),
 		),
 	)
+
+	var err error
+
+	DB, err = leveldb.OpenFile("./db", nil)
+	if err != nil {
+		panic(err)
+	}
+
+	defer DB.Close()
 
 	http.HandleFunc("/", rootHandler)
 
@@ -90,27 +110,117 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check for file size
 	r.ParseMultipartForm(MaxSize)
-	file, header, err := r.FormFile("file")
+	f, header, err := r.FormFile("file")
 	if err != nil || header.Size > MaxSize {
 		fmt.Fprintf(w, "Max file size is 512 MiB")
 		return
 	}
 
-	_, err = ioutil.ReadAll(file)
+	// Read the file
+	file, err := ioutil.ReadAll(f)
 	if err != nil {
 		fmt.Fprintf(w, err.Error())
 		return
 	}
 
-	name := "test"
-
-	// name, err := UploadFile(bytes, header.Size, filepath.Ext(header.Filename))
-
-	// if err != nil {
-	// 	fmt.Fprintf(w, err.Error())
-	// }
+	name, err := uploadFile(file, filepath.Ext(header.Filename))
 
 	fmt.Fprintf(w, "https://%s/%s", r.Host, name)
+}
+
+func uploadFile(file []byte, extension string) (string, error) {
+	hash := sha256.Sum256(file)
+	val, err := DB.Get(hash[:], nil)
+
+	// If the file has been found
+	if err != leveldb.ErrNotFound {
+		file, err := os.Stat(dir)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// time passed since upload
+		timePassed, maxAge := calculateAge(file.ModTime(), file.Size())
+
+		// only reupload if it's <= 95% through its lifespan
+		if timePassed/maxAge <= 0.95 {
+			return string(val), nil
+		}
+
+		// Delete it, as it's going to be put anyway
+		DB.Delete(hash[:], nil)
+	}
+
+	var name string
+	for {
+		name = generateFileName(5) + extension
+
+		// check if a file exists with the same name
+		_, err := os.Stat("files/" + name)
+		if err != nil {
+			// if the file doesn't exist, we've found a name
+			if os.IsNotExist(err) {
+				break
+			}
+
+			// return if there is any other err
+			return "", err
+		}
+	}
+
+	// Create the file
+	f, err := os.Create(dir + name)
+	if err != nil {
+		return "", err
+	}
+
+	f.Write(file)
+	f.Close()
+
+	return name, DB.Put(hash[:], []byte(name), nil)
+}
+
+func deleteFiles() {
+	// Clear files every day
+	for range time.Tick(time.Hour * 24) {
+		files, err := ioutil.ReadDir(dir)
+
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+
+		for _, file := range files {
+			timePassed, maxAge := calculateAge(file.ModTime(), file.Size())
+
+			if timePassed > maxAge {
+				os.Remove(dir + file.Name())
+				log.Printf("Deleted %s \n'", file.Name())
+			}
+		}
+	}
+}
+
+// calculateAge returns the maximum possible age of a file and the time that has passed since its creation
+func calculateAge(mod time.Time, size int64) (float64, float64) {
+	// https://0x0.st
+	// retention = min_age + (-max_age + min_age) * pow((file_size / max_size - 1), 3)
+	return math.Floor(float64(MinAge) + float64(-MaxAge+MinAge)*math.Pow(float64(size)/float64(MaxSize)-float64(1), float64(3))),
+		float64(daysBetween(mod, time.Now()))
+}
+
+// generateFileName takes in a length and generates a random name
+func generateFileName(n int) string {
+	// https://medium.com/@kpbird/golang-generate-fixed-size-random-string-dd6dbd5e63c0
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz123456789")
+	b := make([]rune, n)
+
+	for i := range b {
+		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+
+	}
+
+	return string(b)
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
@@ -152,4 +262,20 @@ func env(key, fallback string) string {
 	}
 
 	return fallback
+}
+
+func daysBetween(a, b time.Time) int {
+	if a.After(b) {
+		a, b = b, a
+
+	}
+
+	days := -a.YearDay()
+	for year := a.Year(); year < b.Year(); year++ {
+		days += time.Date(year, time.December, 31, 0, 0, 0, 0, time.UTC).YearDay()
+
+	}
+	days += b.YearDay()
+
+	return days
 }
