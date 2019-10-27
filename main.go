@@ -40,7 +40,11 @@ func main() {
 	address = env("ADDRESS", ":8080")
 	dir = env("DIR", "files/")
 
-	static = http.StripPrefix("/", http.FileServer(http.Dir(dir)))
+	static = http.StripPrefix("/",
+		http.FileServer(
+			http.Dir(dir),
+		),
+	)
 
 	http.HandleFunc("/", rootHandler)
 
@@ -70,6 +74,11 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	if method != "POST" {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
+
+	uploadHandler(w, r)
+}
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
