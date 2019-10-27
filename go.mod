@@ -1,8 +1,5 @@
 module github.com/fr3fou/up
 
-go 1.12
+go 1.13
 
-require (
-	github.com/etcd-io/bbolt v1.3.3 // indirect
-	go.etcd.io/bbolt v1.3.3
-)
+require github.com/syndtr/goleveldb v1.0.0
