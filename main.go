@@ -51,7 +51,7 @@ func main() {
 
 	http.HandleFunc("/", rootHandler)
 
-	log.Printf("up! ⚡ is running on %s!", address)
+	log.Printf("up! ⚡️ is running on %s!", address)
 	if err := http.ListenAndServe(address, nil); err != nil {
 		log.Fatal(err)
 	}
