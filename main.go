@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -21,27 +22,66 @@ const (
 )
 
 var (
-	// Auth is the username:password combination for uploading files
-	Auth string
+	// auth is the username:password combination for uploading files
+	auth string
 
-	// Address is the port or address for up
-	Address string
+	// address is the port or address for up
+	address string
+
+	// dir is the directory for uploading files
+	dir string
+
+	// static is the handler for static files
+	static http.Handler
 )
 
 func main() {
-	Auth = env("AUTH", "")
-	Address = env("ADDRESS", ":8080")
+	auth = env("AUTH", "")
+	address = env("ADDRESS", ":8080")
+	dir = env("DIR", "files/")
+
+	static = http.StripPrefix("/", http.FileServer(http.Dir(dir)))
 
 	http.HandleFunc("/", rootHandler)
 
-	log.Printf("up! ⚡ is running on %s!", Address)
-	if err := http.ListenAndServe(Address, nil); err != nil {
+	log.Printf("up! ⚡ is running on %s!", address)
+	if err := http.ListenAndServe(address, nil); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	method := r.Method
+	// Landing "page"
+	if path == "/" && method == "GET" {
+		landingPage(w, r)
+		return
+	}
 
+	// Static file serving
+	if path != "/" && method == "GET" {
+		static.ServeHTTP(w, r)
+		return
+	}
+
+	// Disallow any other methods
+	if method != "POST" {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+	}
+}
+
+func landingPage(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, `%s!
+UPLOAD:
+	~/ $: curl -F 'file=@your-file' %s
+	 %s/fpFx9.png
+AUTH:
+	Depending on the config of up, you may have to provide a Basic Authorization header
+	~/ $: curl -F 'file=@your-file' %s --user username:password 
+SOURCE:
+	https://github.com/fr3fou/up	
+`, r.Host, r.Host, r.Host)
 }
 
 func env(key, fallback string) string {
