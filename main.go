@@ -60,6 +60,8 @@ func main() {
 		),
 	)
 
+	os.Mkdir(dir, 0777)
+
 	var err error
 
 	DB, err = leveldb.OpenFile("./db", nil)
@@ -212,12 +214,11 @@ func calculateAge(mod time.Time, size int64) (float64, float64) {
 // generateFileName takes in a length and generates a random name
 func generateFileName(n int) string {
 	// https://medium.com/@kpbird/golang-generate-fixed-size-random-string-dd6dbd5e63c0
-	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz123456789")
+	var letterRunes = []rune("abcdefghijklmnopqrstuvwxyz1234567890")
 	b := make([]rune, n)
 
 	for i := range b {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
-
 	}
 
 	return string(b)
@@ -238,6 +239,10 @@ SOURCE:
 
 // https://gist.github.com/nicerobot/4375261#file-server-go
 func isAuth(w http.ResponseWriter, r *http.Request) bool {
+	// if up doesn't have an auth variable, anyone can upload
+	if auth == "" {
+		return true
+	}
 	cred := r.Header.Get("Authorization")
 
 	if !strings.HasPrefix(cred, "Basic ") {
