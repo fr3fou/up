@@ -53,6 +53,7 @@ func main() {
 func rootHandler(w http.ResponseWriter, r *http.Request) {
 	path := r.URL.Path
 	method := r.Method
+
 	// Landing "page"
 	if path == "/" && method == "GET" {
 		landingPage(w, r)
@@ -69,6 +70,7 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	if method != "POST" {
 		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 	}
+
 }
 
 func landingPage(w http.ResponseWriter, r *http.Request) {
@@ -81,7 +83,7 @@ AUTH:
 	~/ $: curl -F 'file=@your-file' %s --user username:password 
 SOURCE:
 	https://github.com/fr3fou/up	
-`, r.Host, r.Host, r.Host)
+`, r.Host, r.Host, r.Host, r.Host)
 }
 
 func env(key, fallback string) string {
