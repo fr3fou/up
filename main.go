@@ -135,10 +135,11 @@ func uploadFile(file []byte, extension string) (string, error) {
 	val, err := DB.Get(hash[:], nil)
 
 	// If the file has been found
-	if err != leveldb.ErrNotFound {
-		file, err := os.Stat(dir)
+	if val != nil && err != leveldb.ErrNotFound {
+		file, err := os.Stat(dir + string(val))
 		if err != nil {
 			log.Println(err)
+			return "", err
 		}
 
 		// time passed since upload
