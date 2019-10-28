@@ -145,8 +145,8 @@ func uploadFile(file []byte, extension string) (string, error) {
 		// time passed since upload
 		timePassed, maxAge := calculateAge(file.ModTime(), file.Size())
 
-		// only reupload if it's <= 95% through its lifespan
-		if timePassed/maxAge <= 0.95 {
+		// only reupload if it's >= 95% through its lifespan
+		if timePassed/maxAge < 0.95 {
 			return string(val), nil
 		}
 
