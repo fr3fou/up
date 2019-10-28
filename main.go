@@ -160,7 +160,7 @@ func uploadFile(file []byte, extension string) (string, error) {
 		name = generateFileName(5) + extension
 
 		// check if a file exists with the same name
-		_, err := os.Stat("files/" + name)
+		_, err := os.Stat(dir + name)
 		if err != nil {
 			// if the file doesn't exist, we've found a name
 			if os.IsNotExist(err) {
