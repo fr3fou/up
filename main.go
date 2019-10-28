@@ -152,6 +152,7 @@ func uploadFile(file []byte, extension string) (string, error) {
 
 		// Delete it, as it's going to be put anyway
 		DB.Delete(hash[:], nil)
+		os.Remove(dir + string(val))
 	}
 
 	var name string
