@@ -49,6 +49,10 @@ var (
 	DB *leveldb.DB
 )
 
+func init() {
+	rand.Seed(time.Now().Unix())
+}
+
 func main() {
 	auth = env("AUTH", "")
 	address = env("ADDRESS", ":8080")
